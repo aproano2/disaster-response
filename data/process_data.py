@@ -1,15 +1,16 @@
 #! /usr/bin/env python3
 
+import sys
 import pandas as pd
 from sqlalchemy import create_engine
-import sys
+
 
 
 def load_data(messages_filepath, categories_filepath):
     """
     Load two csv files and merge them on column `id`
     Inputs:
-    - messages_filepath: location of the messages csv 
+    - messages_filepath: location of the messages csv
     - categories_filepath: location of the categories csv
 
     Output:
@@ -62,6 +63,9 @@ def save_data(df, database_filename):
 
 
 def main():
+    """
+    Execute the ETL pipeline
+    """
     if len(sys.argv) == 4:
 
         messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
@@ -72,12 +76,12 @@ def main():
 
         print('Cleaning data...')
         df = clean_data(df)
-        
+
         print('Saving data...\n    DATABASE: {}'.format(database_filepath))
         save_data(df, database_filepath)
-        
+
         print('Cleaned data saved to database!')
-    
+
     else:
         print('Please provide the filepaths of the messages and categories '\
               'datasets as the first and second argument respectively, as '\

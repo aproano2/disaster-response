@@ -2,21 +2,19 @@
 
 import sys
 import re
-import pandas as pd
-import numpy as np
 import nltk
 import pickle
+import pandas as pd
 from nltk.corpus import stopwords
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from sqlalchemy import create_engine
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import confusion_matrix
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, f1_score, precision_score, recall_score
+from sklearn.metrics import f1_score, precision_score, recall_score
 
 # download necessary NLTK data
 nltk.download(['punkt', 'wordnet', 'stopwords'])
@@ -28,16 +26,16 @@ def load_data(database_filepath):
     modeling
     Input:
     - database_filepath: location of the database
-    
+
     Output:
     - X: training data
     - y: taining labels
     - category names
     """
     engine = create_engine('sqlite:///{}'.format(database_filepath))
-    df = pd.read_sql_table('disaster-response',engine)
+    df = pd.read_sql_table('disaster-response', engine)
     X = df['message']
-    y = df.iloc[:,4:]
+    y = df.iloc[:, 4:]
     return X, y, y.columns
 
 def tokenize(text):
@@ -46,7 +44,7 @@ def tokenize(text):
     lemmatizes the text. It does not consider stop words.
     Inputs:
     - text
-    
+
     Outputs:
     - tokenized text
     """
@@ -58,7 +56,7 @@ def tokenize(text):
     stop_words = stopwords.words("english")
     lemmatizer = WordNetLemmatizer()
     return [lemmatizer.lemmatize(tok.strip().lower()) for tok in tokens
-                    if tok.strip().lower() not in stop_words]
+            if tok.strip().lower() not in stop_words]
 
 
 def build_model():
@@ -86,7 +84,7 @@ def build_model():
 
 def display_results(y_test, y_pred, category_names):
     """
-    Display the results from model tesitng. It prints F1-score, precision, 
+    Display the results from model tesitng. It prints F1-score, precision,
     recall and accuracy.
     Input:
     - y_test: training labels
@@ -100,9 +98,9 @@ def display_results(y_test, y_pred, category_names):
         print("Precision:", precision_score(y_test.values[:, n], y_pred[:, n]))
         print("Recall:", recall_score(y_test.values[:, n], y_pred[:, n]))
         print("Accuracy:", accuracy)
-        print()  
+        print()
 
-        
+
 def evaluate_model(model, X_test, Y_test, category_names):
     """
     Evaluate the model.
@@ -127,18 +125,21 @@ def save_model(model, model_filepath):
 
 
 def main():
+    """
+    Execute ML pipeline
+    """
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
-        
+
         print('Building model...')
         model = build_model()
-        
+
         print('Training model...')
         model.fit(X_train, Y_train)
-        
+
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
 
