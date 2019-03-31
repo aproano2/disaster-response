@@ -9,6 +9,13 @@ is to create a machine learning pipeline that categorizes these events
 in a way that new messages sent can be relayed to the appropriate
 relief agency.
 
+In order to install all Python the dependencies, please execute the
+following command.
+
+```
+$ pip install -r requirements.txt
+```
+
 ## ETL Pipeline
 
 The ETL process merges data from two different files that include the
