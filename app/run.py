@@ -4,6 +4,9 @@ import pandas as pd
 
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
+import nltk
+nltk.download(['stopwords'])
+from nltk.corpus import stopwords
 
 from flask import Flask
 from flask import render_template, request, jsonify
@@ -26,11 +29,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
+df = pd.read_sql_table('disaster-response', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("../models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -39,13 +42,60 @@ model = joblib.load("../models/your_model_name.pkl")
 def index():
     
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
+    # Plots for the categories histogram
+    categories = df.columns[4:]
+    categories_count = df.iloc[:,4:].sum()
+    
+    # Plot popular words
+    words = pd.Series([w for w in ' '.join(df['message']).lower().split() 
+                       if w.isalpha()])
+    words_no_stop = words[~words.isin(stopwords.words('english'))]
+    top10_words = words_no_stop.value_counts().index[:10]
+    top10_count = words_no_stop.value_counts()[:10]
+    
+
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
+        {
+            'data': [
+                Bar(
+                    x=top10_words,
+                    y=top10_count
+                )
+            ],
+            'layout': {
+                'title': 'Top 10 Words in the Dataset',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Word"
+                }
+            }
+        },
+        
+        {
+            'data': [
+                Bar(
+                    x=categories,
+                    y=categories_count
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category"
+                }
+            }
+        },
+                
         {
             'data': [
                 Bar(
